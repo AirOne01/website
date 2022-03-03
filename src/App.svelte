@@ -1,65 +1,86 @@
-<script lang="ts">
-  import logo from './assets/svelte.png'
-  import Counter from './lib/Counter.svelte'
+<script>
+  import {
+    Canvas,
+    Scene,
+    PerspectiveCamera,
+    Mesh,
+    DirectionalLight,
+    MeshStandardMaterial,
+    BoxBufferGeometry,
+    WebGLRenderer,
+    AmbientLight,
+    Vector3,
+    MathUtils,
+  } from 'svelthree';
+  import gsap from "gsap";
+
+  let cubeGeometry = new BoxBufferGeometry(0.8, 0.8, 0.8);
+  cubeGeometry.translate(0, 0, 0);
+  cubeGeometry.rotateY(MathUtils.degToRad(180));
+
+  let cubeMaterial = new MeshStandardMaterial();
+
+  /**
+   * Pointer events can be dispatched twice, so you can separate interactive mesh-animation from other logic happening on e.g. click
+   * for example on:click={doFoo} & onClick={doBar}
+   */
+
+  function handleOnClick(e) {
+    console.log('Triggered !');
+  }
+
+  const triggerOnClickAni = (e) => {
+    let obj = e.detail.target;
+    gsap.to(obj.scale, {
+      duration: 0.25,
+      x: 1.5,
+      y: 1.5,
+      z: 1.5,
+      ease: 'sine.out',
+    });
+  };
+
+  const triggerOnOverAni = (e) => {
+    let obj = e.detail.target;
+    gsap.to(obj.scale, {
+      duration: 0.25,
+      x: 0.8,
+      y: 1.25,
+      z: 0.8,
+      ease: 'sine.out',
+    });
+  };
+
+  const triggerOnOutAni = (e) => {
+    let obj = e.detail.target;
+    gsap.to(obj.scale, { duration: 0.5, x: 1, y: 1, z: 1, ease: 'sine.out' });
+  };
 </script>
 
-<main>
-  <img src={logo} alt="Svelte Logo" />
-  <h1>Hello Typescript!</h1>
+<Canvas let:sti w={500} h={500} interactive>
+  <Scene {sti} let:scene id='scene1' props={{ background: 0xedf2f7 }}>
+    <PerspectiveCamera
+      {scene}
+      id='cam1'
+      props={{ position: [0, 0, 3], lookAt: [0, 0, 0] }} />
+    <DirectionalLight {scene} props={{ position: [3, 3, 3] }} />
+    <AmbientLight {scene} props={{ color: 0xffffff, intensity: 1.25 }} />
 
-  <Counter />
+    <Mesh
+      {scene}
+      geometry={cubeGeometry}
+      material={cubeMaterial}
+      mat={{ roughness: 0.5, metalness: 0.5, color: 0xff3e00 }}
+      pos={[0, 0, 0]}
+      interact
+      onClick={triggerOnClickAni}
+      onPointerOver={triggerOnOverAni}
+      onPointerLeave={triggerOnOutAni} />
+  </Scene>
 
-  <p>
-    Visit <a href="https://svelte.dev">svelte.dev</a> to learn how to build Svelte
-    apps.
-  </p>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme">SvelteKit</a> for
-    the officially supported framework, also powered by Vite!
-  </p>
-</main>
-
-<style>
-  :root {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  }
-
-  main {
-    text-align: center;
-    padding: 1em;
-    margin: 0 auto;
-  }
-
-  img {
-    height: 16rem;
-    width: 16rem;
-  }
-
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4rem;
-    font-weight: 100;
-    line-height: 1.1;
-    margin: 2rem auto;
-    max-width: 14rem;
-  }
-
-  p {
-    max-width: 14rem;
-    margin: 1rem auto;
-    line-height: 1.35;
-  }
-
-  @media (min-width: 480px) {
-    h1 {
-      max-width: none;
-    }
-
-    p {
-      max-width: none;
-    }
-  }
-</style>
+  <WebGLRenderer
+    {sti}
+    sceneId='scene1'
+    camId='cam1'
+    config={{ antialias: true, alpha: false }} />
+</Canvas>
