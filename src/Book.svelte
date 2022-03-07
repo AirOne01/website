@@ -35,7 +35,7 @@
   {scene}
   {geometry}
   material={cubeMaterial}
-  mat={{ roughness: 1, metalness: 0, color: Math.random() * 0xffffff }}
+  mat={{ roughness: 1, metalness: 0, color: 0x888888 + Math.random() * 0x444444 }}
   pos={[(j*0.103)-((columns*0.103)/2), (i*0.75)-((rows*0.75)/2)+0.5, 0]}
   interact
   {onClick}

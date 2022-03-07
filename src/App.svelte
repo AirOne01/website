@@ -60,7 +60,9 @@ Geometry,
       });
       gsap.to(obj.rotation, {
         duration: 0.15,
+        x: 0,
         y: 0,
+        z: 0,
         ease: 'sine.in',
       });
     } else {
@@ -75,6 +77,7 @@ Geometry,
 
   function onPointerMove(e?: CustomEvent<any>) {
     let obj = e.detail.target;
+    if (!obj.isBig) return;
 
     let unpr = new Vector3().copy(e.detail.unprojected);
     let unprwtl = obj.worldToLocal(unpr).add(new Vector3(0, 0, 1));
