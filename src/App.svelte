@@ -13,54 +13,48 @@
     MathUtils,
     Mesh,
     Vector3,
-Geometry
+Geometry,
   } from 'svelthree';
+  import Book from './Book.svelte';
 
-  let cubeGeometry = new BoxBufferGeometry(0.1, 0.7, 0.4);
-  cubeGeometry.translate(0, 0, 0);
-  cubeGeometry.rotateY(MathUtils.degToRad(180));
-
-  let cubeMaterial = new MeshStandardMaterial();
-
-  let oldPos = writable(undefined);
-  let isBig = writable(false);
-
-  const triggerOnClickAni = (e?: CustomEvent<any>) => {
+  const onClick = (e?: CustomEvent<any>) => {
     let obj = e.detail.target;
-    if (!get(oldPos)) {
-      oldPos.set([obj.position.x, obj.position.y, obj.position.z]);
-      isBig.set(true);
+    obj.isBig = true;
+    obj.oldPos = {x: obj.position.x, y: obj.position.y, z: obj.position.z};
+    gsap.to(obj.position, {
+      duration: 0.25,
+      x: 0,
+      z: 2,
+      y: 0,
+      ease: 'sine.out',
+    });
+    gsap.to(obj.rotation, {
+      duration: 0.20,
+      y: 1.55,
+      ease: 'power1.in',
+    });
+  };
+
+  const onPointerOver = (e?: CustomEvent<any>) => {
+    let obj = e.detail.target;
+    if (obj.isBig) {
+      let obj = e.detail.target;
       gsap.to(obj.position, {
         duration: 0.25,
-        x: 0,
-        z: 2,
-        y: 0,
+        z: 0.3,
         ease: 'sine.out',
-      });
-      gsap.to(obj.rotation, {
-        duration: 0.20,
-        y: 1.55,
-        ease: 'power1.in',
       });
     }
   };
 
-  const triggerOnOverAni = (e?: CustomEvent<any>) => {
+  const onPointerLeave = (e?: CustomEvent<any>) => {
     let obj = e.detail.target;
-    gsap.to(obj.position, {
-      duration: 0.25,
-      z: 0.3,
-      ease: 'sine.out',
-    });
-  };
-
-  const triggerOnOutAni = (e?: CustomEvent<any>) => {
-    let obj = e.detail.target;
-    if (get(isBig)) {
+    if (obj.isBig) {
+      console.log(obj.oldPos);
       gsap.to(obj.position, {
         duration: 0.25,
-        x: get(oldPos)[0],
-        y: get(oldPos)[1],
+        x: obj.oldPos.x,
+        y: obj.oldPos.y,
         z: 0,
         ease: 'sine.out',
       });
@@ -76,9 +70,16 @@ Geometry
         ease: 'sine.out',
       });
     }
-    oldPos.set(undefined);
-    isBig.set(false);
+    obj.isBig = false;
   };
+
+  function onPointerMove(e?: CustomEvent<any>) {
+    let obj = e.detail.target;
+
+    let unpr = new Vector3().copy(e.detail.unprojected);
+    let unprwtl = obj.worldToLocal(unpr).add(new Vector3(0, 0, 1));
+    obj.lookAt(unprwtl);
+  }
 
   export const rows = 3;
   export const columns = 20;
@@ -100,16 +101,16 @@ Geometry
 
       {#each Array(rows) as _, i}
         {#each Array(columns) as _, j}
-          <Mesh
+          <Book
             {scene}
-            geometry={cubeGeometry}
-            material={cubeMaterial}
-            mat={{ roughness: 1, metalness: 0, color: Math.random() * 0xffffff }}
-            pos={[(j*0.103)-((columns*0.103)/2), (i*0.75)-((rows*0.75)/2)+0.5, 0]}
-            interact
-            onClick={triggerOnClickAni}
-            onPointerOver={triggerOnOverAni}
-            onPointerLeave={triggerOnOutAni}
+            {i}
+            {j}
+            {rows}
+            {columns}
+            {onClick}
+            {onPointerMove}
+            {onPointerLeave}
+            {onPointerOver}
           />
         {/each}
       {/each}
