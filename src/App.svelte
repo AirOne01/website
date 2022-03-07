@@ -22,12 +22,12 @@ Geometry
 
   let cubeMaterial = new MeshStandardMaterial();
 
-  let oldPos = writable();
+  let oldPos = writable([0, 1, 0]);
   let isBig = writable(false);
 
   const triggerOnClickAni = (e?: CustomEvent<any>) => {
     let obj = e.detail.target;
-    oldPos.set(obj.position)
+    oldPos.set([obj.position.x, obj.position.y, obj.position.z]);
     isBig.set(true);
     gsap.to(obj.position, {
       duration: 0.25,
@@ -57,8 +57,8 @@ Geometry
     if (get(isBig)) {
       gsap.to(obj.position, {
         duration: 0.25,
-        x: get(oldPos)['x'],
-        y: get(oldPos)['y'],
+        x: get(oldPos)[0],
+        y: get(oldPos)[1],
         z: 0,
         ease: 'sine.out',
       });
