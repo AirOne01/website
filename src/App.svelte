@@ -22,25 +22,27 @@ Geometry
 
   let cubeMaterial = new MeshStandardMaterial();
 
-  let oldPos = writable([0, 1, 0]);
+  let oldPos = writable(undefined);
   let isBig = writable(false);
 
   const triggerOnClickAni = (e?: CustomEvent<any>) => {
     let obj = e.detail.target;
-    oldPos.set([obj.position.x, obj.position.y, obj.position.z]);
-    isBig.set(true);
-    gsap.to(obj.position, {
-      duration: 0.25,
-      x: 0,
-      z: 2,
-      y: 0,
-      ease: 'sine.out',
-    });
-    gsap.to(obj.rotation, {
-      duration: 0.20,
-      y: 1.55,
-      ease: 'power1.in',
-    });
+    if (!get(oldPos)) {
+      oldPos.set([obj.position.x, obj.position.y, obj.position.z]);
+      isBig.set(true);
+      gsap.to(obj.position, {
+        duration: 0.25,
+        x: 0,
+        z: 2,
+        y: 0,
+        ease: 'sine.out',
+      });
+      gsap.to(obj.rotation, {
+        duration: 0.20,
+        y: 1.55,
+        ease: 'power1.in',
+      });
+    }
   };
 
   const triggerOnOverAni = (e?: CustomEvent<any>) => {
@@ -74,15 +76,20 @@ Geometry
         ease: 'sine.out',
       });
     }
+    oldPos.set(undefined);
     isBig.set(false);
   };
 
   export const rows = 3;
   export const columns = 20;
+
+  let innerHeight: number;
+  let innerWidth: number;
 </script>
 
+<svelte:window bind:innerHeight bind:innerWidth/>
 <main>
-  <Canvas let:sti w={500} h={500} interactive>
+  <Canvas let:sti w={innerWidth} h={innerHeight} interactive>
     <Scene {sti} let:scene id='scene1' props={{ background: 0xedf2f7 }}>
       <PerspectiveCamera
         {scene}
