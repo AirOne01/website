@@ -15,7 +15,6 @@
     Vector3,
 Geometry
   } from 'svelthree';
-import Book from './Book.svelte';
 
   let cubeGeometry = new BoxBufferGeometry(0.1, 0.7, 0.4);
   cubeGeometry.translate(0, 0, 0);
@@ -24,13 +23,11 @@ import Book from './Book.svelte';
   let cubeMaterial = new MeshStandardMaterial();
 
   let oldPos = writable();
-  let oldRot = writable();
   let isBig = writable(false);
 
   const triggerOnClickAni = (e?: CustomEvent<any>) => {
     let obj = e.detail.target;
     oldPos.set(obj.position)
-    oldRot.set(obj.rotation)
     isBig.set(true);
     gsap.to(obj.position, {
       duration: 0.25,
@@ -82,10 +79,6 @@ import Book from './Book.svelte';
 
   export const rows = 3;
   export const columns = 20;
-
-  const arr: Vector3[] = new Array(rows*columns);
-
-  let pos: Vector3;
 </script>
 
 <main>
