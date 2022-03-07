@@ -5,15 +5,17 @@
     Canvas,
     Scene,
     PerspectiveCamera,
-    Mesh,
     DirectionalLight,
     MeshStandardMaterial,
     BoxBufferGeometry,
     WebGLRenderer,
     AmbientLight,
-    Vector3,
     MathUtils,
+    Mesh,
+    Vector3,
+Geometry
   } from 'svelthree';
+import Book from './Book.svelte';
 
   let cubeGeometry = new BoxBufferGeometry(0.1, 0.7, 0.4);
   cubeGeometry.translate(0, 0, 0);
@@ -30,7 +32,6 @@
     oldPos.set(obj.position)
     oldRot.set(obj.rotation)
     isBig.set(true);
-    console.log('Changed values: ', get(oldPos), get(oldRot));
     gsap.to(obj.position, {
       duration: 0.25,
       x: 0,
@@ -56,7 +57,6 @@
 
   const triggerOnOutAni = (e?: CustomEvent<any>) => {
     let obj = e.detail.target;
-    console.log(get(oldPos), get(oldRot), get(isBig));
     if (get(isBig)) {
       gsap.to(obj.position, {
         duration: 0.25,
@@ -65,6 +65,11 @@
         z: 0,
         ease: 'sine.out',
       });
+      gsap.to(obj.rotation, {
+        duration: 0.15,
+        y: 0,
+        ease: 'sine.in',
+      });
     } else {
       gsap.to(obj.position, {
         duration: 0.25,
@@ -72,13 +77,15 @@
         ease: 'sine.out',
       });
     }
-    gsap.to(obj.rotation, {
-      duration: 0.15,
-      y: get(oldRot)['y'],
-      ease: 'sine.in',
-    });
     isBig.set(false);
   };
+
+  export const rows = 3;
+  export const columns = 20;
+
+  const arr: Vector3[] = new Array(rows*columns);
+
+  let pos: Vector3;
 </script>
 
 <main>
@@ -88,20 +95,23 @@
         {scene}
         id='cam1'
         props={{ position: [0, 0, 3], lookAt: [0, 0, 0] }} />
-      <DirectionalLight {scene} props={{ position: [3, 3, 3] }} />
-      <AmbientLight {scene} props={{ color: 0xffffff, intensity: 1.25 }} />
+      <DirectionalLight {scene} props={{ position: [3, 3, 3], intensity: 0.5 }} />
+      <AmbientLight {scene} props={{ color: 0xffffff, intensity: 0.5 }} />
 
-      {#each Array(5) as _, i}
-        <Mesh
-        {scene}
-        geometry={cubeGeometry}
-        material={cubeMaterial}
-        mat={{ roughness: 1, metalness: 0, color: 0xff3e00 }}
-        pos={[i*0.1, 0, 0]}
-        interact
-        onClick={triggerOnClickAni}
-        onPointerOver={triggerOnOverAni}
-        onPointerLeave={triggerOnOutAni} />
+      {#each Array(rows) as _, i}
+        {#each Array(columns) as _, j}
+          <Mesh
+            {scene}
+            geometry={cubeGeometry}
+            material={cubeMaterial}
+            mat={{ roughness: 1, metalness: 0, color: Math.random() * 0xffffff }}
+            pos={[(j*0.103)-((columns*0.103)/2), (i*0.75)-((rows*0.75)/2)+0.5, 0]}
+            interact
+            onClick={triggerOnClickAni}
+            onPointerOver={triggerOnOverAni}
+            onPointerLeave={triggerOnOutAni}
+          />
+        {/each}
       {/each}
     </Scene>
 
