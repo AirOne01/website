@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "gsap": "^3.9.1",
-    "svelthree": "^0.119.0-5"
+    "three": "^0.138.3"
   }
 }

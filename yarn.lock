@@ -2035,17 +2035,6 @@ svelte@^3.44.0:
   resolved "https://registry.yarnpkg.com/svelte/-/svelte-3.46.4.tgz#0c46bc4a3e20a2617a1b7dc43a722f9d6c084a38"
   integrity sha512-qKJzw6DpA33CIa+C/rGp4AUdSfii0DOTCzj/2YpSKKayw5WGSS624Et9L1nU1k2OVRS9vaENQXp2CVZNU+xvIg==
 
-"svelthree-three@git+https://github.com/vatro/svelthree-three.git#119":
-  version "0.119.1"
-  resolved "git+https://github.com/vatro/svelthree-three.git#3a0c78631b9382179828c1ace0edb83df541a6a1"
-
-svelthree@^0.119.0-5:
-  version "0.119.0-5"
-  resolved "https://registry.yarnpkg.com/svelthree/-/svelthree-0.119.0-5.tgz#b3da132426151ae3c6745562bad08f984779320b"
-  integrity sha512-5niteQrl5l7evhSSkfcf/I8FSccZD39kLnEZBKmnSJYwUon87fDnO8+maOzxcFBaWEOM1RdRcGy9J0LdXbLfrQ==
-  dependencies:
-    svelthree-three "git+https://github.com/vatro/svelthree-three.git#119"
-
 tar@^6.0.2, tar@^6.1.2:
   version "6.1.11"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.11.tgz#6760a38f003afa1b2ffd0ffe9e9abbd0eab3d621"
@@ -2057,6 +2046,11 @@ tar@^6.0.2, tar@^6.1.2:
     minizlib "^2.1.1"
     mkdirp "^1.0.3"
     yallist "^4.0.0"
+
+three@^0.138.3:
+  version "0.138.3"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.138.3.tgz#7be5153d79dcbf9e9baad82e7faf8c29edda4ed0"
+  integrity sha512-4t1cKC8gimNyJChJbaklg8W/qj3PpsLJUIFm5LIuAy/hVxxNm1ru2FGTSfbTSsuHmC/7ipsyuGKqrSAKLNtkzg==
 
 to-regex-range@^5.0.1:
   version "5.0.1"

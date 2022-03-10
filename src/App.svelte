@@ -1,21 +1,70 @@
 <script>
   import gsap from 'gsap';
+  import { onMount } from 'svelte';
   import {
-    Canvas,
-    Scene,
-    PerspectiveCamera,
-    DirectionalLight,
-    WebGLRenderer,
     AmbientLight,
+    BoxGeometry,
+    DirectionalLight,
+    FontLoader,
+    MathUtils,
+    Mesh,
+    MeshStandardMaterial,
+    PerspectiveCamera,
+    Raycaster,
+    Scene,
+    TextGeometry,
+    WebGLRenderer,
+    Vector2,
     Vector3,
-    MathUtils
-  } from 'svelthree';
-  import Book from './Book.svelte';
+  } from 'three';
 
-  const onClick = (e) => {
+  const rows = 4;
+  const columns = 20;
+  const colors = [
+    0x581845,
+    0x900c3f,
+    0xc70039,
+    0xff5733,
+    0xffc300
+  ]
+  let canvas;
+
+  onMount(() => {
+    let currentBig = null;
+
+    const scene = new Scene();
+    const cam = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new WebGLRenderer({ antialias: true, canvas: canvas });
+    renderer.setSize(1600, 900);
+
+    const light = new AmbientLight(0xffffff, 0.5);
+    scene.add(light);
+
+    const cubeMaterial = new MeshStandardMaterial();
+    const geometry = new BoxGeometry(1, 1, 1);
+
+    const mesh = new Mesh(geometry, cubeMaterial);
+    scene.add(mesh);
+
+    animate(renderer, scene, cam);
+  });
+
+  function animate(renderer, scene, camera) {
+    requestAnimationFrame(animate);
+
+    renderer.render(scene, camera);
+  }
+
+  function onClick(e) {
     let obj = e.detail.target;
+    // get mesh
+    if (currentBig && obj == currentBig) return;
+    leave();
+    // unfocus currently shown book
+    currentBig = obj;
     obj.isBig = true;
     obj.oldPos = {x: obj.position.x, y: obj.position.y, z: obj.position.z};
+
     gsap.to(obj.position, {
       duration: 0.25,
       x: 0,
@@ -30,9 +79,9 @@
     });
   };
 
-  const onPointerOver = (e) => {
+  function onPointerOver(e) {
     let obj = e.detail.target;
-    if (obj.isBig) {
+    if (!obj.isBig) {
       let obj = e.detail.target;
       gsap.to(obj.position, {
         duration: 0.25,
@@ -42,33 +91,16 @@
     }
   };
 
-  const onPointerLeave = (e) => {
+  function onPointerLeave(e) {
     let obj = e.detail.target;
-    if (obj.isBig) {
-      console.log(obj.oldPos);
-      gsap.to(obj.position, {
-        duration: 0.25,
-        x: obj.oldPos.x,
-        y: obj.oldPos.y,
-        z: 0,
-        ease: 'sine.out',
-      });
-      gsap.to(obj.rotation, {
-        duration: 0.15,
-        x: 0,
-        y: MathUtils.degToRad(90),
-        z: 0,
-        ease: 'sine.in',
-      });
-    } else {
+    if (!obj.isBig) {
       gsap.to(obj.position, {
         duration: 0.25,
         z: 0,
         ease: 'sine.out',
       });
     }
-    obj.isBig = false;
-  };
+  }
 
   function onPointerMove(e) {
     let obj = e.detail.target;
@@ -79,52 +111,40 @@
     obj.lookAt(unprwtl);
   }
 
-  const rows = 4;
-  const columns = 20;
+  function leave() {
+    if (!currentBig) return;
+    if (currentBig.isBig) {
+      console.log(currentBig.oldPos);
+      gsap.to(currentBig.position, {
+        duration: 0.25,
+        x: currentBig.oldPos.x,
+        y: currentBig.oldPos.y,
+        z: 0,
+        ease: 'sine.out',
+      });
+      gsap.to(currentBig.rotation, {
+        duration: 0.15,
+        x: 0,
+        y: MathUtils.degToRad(90),
+        z: 0,
+        ease: 'sine.in',
+      });
+    }
+    currentBig.isBig = false;
+    currentBig = null;
+  };
 
   let innerHeight, innerWidth;
 </script>
 
 <svelte:window bind:innerHeight bind:innerWidth/>
+
 <main>
-  <Canvas let:sti w={1600} h={900} interactive>
-    <Scene {sti} let:scene id='scene1' props={{ background: 0xedf2f7 }}>
-      <PerspectiveCamera
-        {scene}
-        id='cam1'
-        props={{ position: [0, 0, 4], lookAt: [0, 0, 0] }}
-      />
-      <DirectionalLight {scene} props={{ position: [3, 3, 3], intensity: 0.5 }} />
-      <AmbientLight {scene} props={{ color: 0xffffff, intensity: 0.5 }} />
-
-      {#each Array(rows) as _, i}
-        {#each Array(columns) as _, j}
-          <Book
-            {scene}
-            {i}
-            {j}
-            {rows}
-            {columns}
-            {onClick}
-            {onPointerMove}
-            {onPointerLeave}
-            {onPointerOver}
-            oldPos={[(j*0.103)-((columns*0.103)/2), (i*0.72)-((rows*0.72)/2), 0]}
-          />
-        {/each}
-      {/each}
-    </Scene>
-
-    <WebGLRenderer
-      {sti}
-      sceneId='scene1'
-      camId='cam1'
-      config={{ antialias: true, alpha: false }} />
-  </Canvas>
+  <canvas bind:this={canvas}/>
 </main>
 
 <style lang='scss'>
   :global(body) {
-    background: black;
+    background: white;
   }
 </style>
