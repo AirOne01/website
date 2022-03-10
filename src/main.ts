@@ -1,7 +1,7 @@
 import App from './App.svelte'
 
-const app = new App({
-  target: document.getElementById('app')
+const bookshelf = new App({
+  target: document.getElementById('bookshelf')
 })
 
-export default app
+export default bookshelf

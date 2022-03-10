@@ -1,41 +1,36 @@
-<script lang='ts'>
+<script>
   import gsap from 'gsap';
-  import { writable, get } from 'svelte/store';
   import {
     Canvas,
     Scene,
     PerspectiveCamera,
     DirectionalLight,
-    MeshStandardMaterial,
-    BoxBufferGeometry,
     WebGLRenderer,
     AmbientLight,
-    MathUtils,
-    Mesh,
     Vector3,
-Geometry,
+    MathUtils
   } from 'svelthree';
   import Book from './Book.svelte';
 
-  const onClick = (e?: CustomEvent<any>) => {
+  const onClick = (e) => {
     let obj = e.detail.target;
     obj.isBig = true;
     obj.oldPos = {x: obj.position.x, y: obj.position.y, z: obj.position.z};
     gsap.to(obj.position, {
       duration: 0.25,
       x: 0,
-      z: 2,
       y: 0,
+      z: 2,
       ease: 'sine.out',
     });
     gsap.to(obj.rotation, {
       duration: 0.20,
-      y: 1.55,
+      y: 0,
       ease: 'power1.in',
     });
   };
 
-  const onPointerOver = (e?: CustomEvent<any>) => {
+  const onPointerOver = (e) => {
     let obj = e.detail.target;
     if (obj.isBig) {
       let obj = e.detail.target;
@@ -47,7 +42,7 @@ Geometry,
     }
   };
 
-  const onPointerLeave = (e?: CustomEvent<any>) => {
+  const onPointerLeave = (e) => {
     let obj = e.detail.target;
     if (obj.isBig) {
       console.log(obj.oldPos);
@@ -61,7 +56,7 @@ Geometry,
       gsap.to(obj.rotation, {
         duration: 0.15,
         x: 0,
-        y: 0,
+        y: MathUtils.degToRad(90),
         z: 0,
         ease: 'sine.in',
       });
@@ -75,30 +70,30 @@ Geometry,
     obj.isBig = false;
   };
 
-  function onPointerMove(e?: CustomEvent<any>) {
+  function onPointerMove(e) {
     let obj = e.detail.target;
     if (!obj.isBig) return;
 
     let unpr = new Vector3().copy(e.detail.unprojected);
-    let unprwtl = obj.worldToLocal(unpr).add(new Vector3(0, 0, 1));
+    let unprwtl = obj.worldToLocal(unpr).add(new Vector3(0, 0, 6));
     obj.lookAt(unprwtl);
   }
 
-  export const rows = 3;
-  export const columns = 20;
+  const rows = 4;
+  const columns = 20;
 
-  let innerHeight: number;
-  let innerWidth: number;
+  let innerHeight, innerWidth;
 </script>
 
 <svelte:window bind:innerHeight bind:innerWidth/>
 <main>
-  <Canvas let:sti w={innerWidth} h={innerHeight} interactive>
+  <Canvas let:sti w={1600} h={900} interactive>
     <Scene {sti} let:scene id='scene1' props={{ background: 0xedf2f7 }}>
       <PerspectiveCamera
         {scene}
         id='cam1'
-        props={{ position: [0, 0, 3], lookAt: [0, 0, 0] }} />
+        props={{ position: [0, 0, 4], lookAt: [0, 0, 0] }}
+      />
       <DirectionalLight {scene} props={{ position: [3, 3, 3], intensity: 0.5 }} />
       <AmbientLight {scene} props={{ color: 0xffffff, intensity: 0.5 }} />
 
@@ -114,6 +109,7 @@ Geometry,
             {onPointerMove}
             {onPointerLeave}
             {onPointerOver}
+            oldPos={[(j*0.103)-((columns*0.103)/2), (i*0.72)-((rows*0.72)/2), 0]}
           />
         {/each}
       {/each}

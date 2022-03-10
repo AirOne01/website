@@ -1,42 +1,43 @@
-<script lang="ts">
+<script>
   import {
-    Canvas,
     Scene,
-    PerspectiveCamera,
-    DirectionalLight,
     MeshStandardMaterial,
     BoxBufferGeometry,
-    WebGLRenderer,
-    AmbientLight,
     MathUtils,
     Mesh,
-    Vector3,
   } from 'svelthree';
 
-  export let i: number, j: number;
-  export let columns: number, rows: number;
-  export let scene: Scene;
-  export let onClick: () => void;
-  export let onPointerMove: (e?: CustomEvent<any>) => void;
-  export let onPointerOver: (e?: CustomEvent<any>) => void;
-  export let onPointerLeave: (e?: CustomEvent<any>) => void;
+  export let i, j;
+  export let columns, rows;
+  export let scene;
+  export let onClick;
+  export let onPointerMove;
+  export let onPointerOver;
+  export let onPointerLeave;
 
   // actual properties
   export let isBig = false;
-  export let oldPos: { x: number, y: number, z: number };
+  export let oldPos;
 
   let cubeMaterial = new MeshStandardMaterial();
-  const geometry = new BoxBufferGeometry(0.1, 0.7, 0.4);
-  geometry.translate(0, 0, 0);
-  geometry.rotateY(MathUtils.degToRad(180));
+  const geometry = new BoxBufferGeometry(0.4, 0.7, 0.1);
+
+  const colors = [
+    0x581845,
+    0x900c3f,
+    0xc70039,
+    0xff5733,
+    0xffc300
+  ]
 </script>
 
 <Mesh
   {scene}
   {geometry}
   material={cubeMaterial}
-  mat={{ roughness: 1, metalness: 0, color: 0x888888 + Math.random() * 0x444444 }}
-  pos={[(j*0.103)-((columns*0.103)/2), (i*0.75)-((rows*0.75)/2)+0.5, 0]}
+  mat={{ roughness: 1, metalness: 0, color: colors[Math.floor(Math.random() * colors.length)] }}
+  pos={[(j*0.103)-((columns*0.103)/2), (i*0.75)-((rows*0.75)/3), 0]}
+  rot={[0, MathUtils.degToRad(90), 0]}
   interact
   {onClick}
   {onPointerOver}
