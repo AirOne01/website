@@ -1,8 +1,8 @@
-<script>
-  import { onMount } from 'svelte';
+<script lang='ts'>
+  import { onMount, SvelteComponent } from 'svelte';
   import { createScene } from './scene';
 
-  let el;
+  let el: SvelteComponent;
 
   onMount(() => {
     createScene(el);
