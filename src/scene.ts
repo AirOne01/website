@@ -31,8 +31,6 @@ const scene = new Scene();
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 const geometry = new BoxGeometry(0.4, 0.7, 0.1);
 const material = new MeshStandardMaterial({ color: 0x00ff00 });
-const cube = new Mesh(geometry, material);
-scene.add(cube);
 camera.position.z = 4;
 const light1 = new AmbientLight(0xffffff, 0.2);
 scene.add(light1);
@@ -99,7 +97,6 @@ function magicRaycast(e): Mesh {
   raycaster.setFromCamera(mouse, camera);
   raycaster.params.Points.threshold = 0.1;
   const intersects = raycaster.intersectObjects(scene.children, true);
-  console.log(intersects);
 
   if (intersects.length == 0) return null;
   return intersects[0].object;
