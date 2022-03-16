@@ -43,6 +43,8 @@ scene.add(light2);
 let renderer: WebGLRenderer;
 const raycaster = new Raycaster();
 
+const mouse = new Vector2();
+
 // for having an equal amount of books in the shelves
 let number = 80;
 let n = 3;
@@ -89,19 +91,21 @@ export const createScene = (el) => {
 
 window.addEventListener('resize', resize);
 
-function magicRaycast(): Mesh {
-  const mouse = new Vector2();
+function magicRaycast(e): Mesh {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
   raycaster.setFromCamera(mouse, camera);
   raycaster.params.Points.threshold = 0.1;
-  const intersects = raycaster.intersectObjects(scene.children);
+  const intersects = raycaster.intersectObjects(scene.children, true);
 
   if (intersects.length == 0) return null;
   console.log(intersects);
   return intersects[0].object;
 }
 
-function onClick() {
-  const obj = magicRaycast();
+function onClick(e) {
+  const obj = magicRaycast(e);
 
   // get mesh
   if (currentBig && obj == currentBig) return;
@@ -125,8 +129,8 @@ function onClick() {
   });
 };
 
-function onPointerMove() {
-  const obj = magicRaycast();
+function onPointerMove(e) {
+  const obj = magicRaycast(e);
   if (!obj) return;
 
   if (!obj.isBig) {
