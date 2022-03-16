@@ -99,7 +99,18 @@ function magicRaycast(e): Mesh {
   const intersects = raycaster.intersectObjects(scene.children, true);
 
   if (intersects.length == 0) return null;
-  return intersects[0].object;
+
+  let inte = null;
+  if (intersects.length > 0) inte = intersects[0];
+
+  for (const el of intersects) {
+    const zPoint = Math.floor(el.point.z * 1000);
+    if (el.distance > inte.distance && zPoint >= 200 && zPoint <= 400) {
+      inte = el;
+    }
+  }
+
+  return inte.object as Mesh;
 }
 
 function onClick(e) {
@@ -154,7 +165,6 @@ function onPointerMove(e) {
 function leave() {
   if (!currentBig) return;
   if (currentBig.isBig) {
-    console.log(currentBig.oldPos);
     gsap.to(currentBig.position, {
       duration: 0.25,
       x: currentBig.oldPos.x,
