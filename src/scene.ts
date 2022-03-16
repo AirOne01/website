@@ -62,6 +62,7 @@ for (let i = 0; i < rows.length; i++) {
     const mesh = new Mesh(geometry, material);
     mesh.translateX((j*0.103)-((rows[i]*0.103)/2));
     mesh.translateY((i*0.72)-((rows.length*0.72)/3));
+    mesh.rotateY(Math.PI/2);
     mesh.material.color.setHex(colors[Math.floor(Math.random() * colors.length)]);
     scene.add(mesh);
 
@@ -98,9 +99,9 @@ function magicRaycast(e): Mesh {
   raycaster.setFromCamera(mouse, camera);
   raycaster.params.Points.threshold = 0.1;
   const intersects = raycaster.intersectObjects(scene.children, true);
+  console.log(intersects);
 
   if (intersects.length == 0) return null;
-  console.log(intersects);
   return intersects[0].object;
 }
 
@@ -112,6 +113,7 @@ function onClick(e) {
   leave();
   // unfocus currently shown book
   currentBig = obj;
+  if (!currentBig) return; //safety
   obj.isBig = true;
   obj.oldPos = {x: obj.position.x, y: obj.position.y, z: obj.position.z};
 
@@ -131,9 +133,19 @@ function onClick(e) {
 
 function onPointerMove(e) {
   const obj = magicRaycast(e);
-  if (!obj) return;
 
-  if (!obj.isBig) {
+  for (const el of books) {
+    if (el.obj == obj) continue;
+    if (el.obj.isBig) continue;
+    gsap.to(el.obj.position, {
+      duration: 0.25,
+      z: 0,
+      ease: 'sine.out',
+    });
+  }
+
+  // if hovering over a book
+  if (obj && !obj.isBig) {
     gsap.to(obj.position, {
       duration: 0.25,
       z: 0.3,
@@ -141,17 +153,6 @@ function onPointerMove(e) {
     });
   }
 };
-
-function onPointerLeave(e) {
-  let obj = e.detail.target;
-  if (!obj.isBig) {
-    gsap.to(obj.position, {
-      duration: 0.25,
-      z: 0,
-      ease: 'sine.out',
-    });
-  }
-}
 
 function leave() {
   if (!currentBig) return;
@@ -167,7 +168,7 @@ function leave() {
     gsap.to(currentBig.rotation, {
       duration: 0.15,
       x: 0,
-      y: MathUtils.degToRad(90),
+      y: Math.PI/2,
       z: 0,
       ease: 'sine.in',
     });
