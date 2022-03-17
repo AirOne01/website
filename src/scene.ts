@@ -49,11 +49,7 @@ let renderer: WebGLRenderer;
 const raycaster = new Raycaster();
 
 const mouse = new Vector2();
-const previousMousePosition = {
-  x: 0,
-  y: 0
-};
-let isDragging = false;
+let dragTime: number;
 
 // for having an equal amount of books in rows of the shelf
 let number = 80;
@@ -90,16 +86,10 @@ export const createScene = (el) => {
   resize();
   animate();
 
-  renderer.domElement.addEventListener('click', onClick);
+  //renderer.domElement.addEventListener('click', onClick);
   renderer.domElement.addEventListener('mousemove', onPointerMove);
-  renderer.domElement.addEventListener('mousedown', e => {
-    mouseDown(e);
-    isDragging = true;
-  });
-  renderer.domElement.addEventListener('mouseup', e => {
-    mouseUp();
-    isDragging = false;
-  });
+  renderer.domElement.addEventListener('mousedown', onMouseDown);
+  renderer.domElement.addEventListener('mouseup', onMouseUp);
 }
 
 function animate() {
@@ -138,30 +128,58 @@ function magicRaycast(e): BookMesh {
   return inte.object;
 }
 
-function onClick(e) {
+function onMouseDown(e) {
+  mouseDown(e);
+  dragTime = new Date().getTime();
+}
+
+function onMouseUp(e) {
+  let lateClick = false;
+
+  if (new Date().getTime() - dragTime > 200) {
+    dragTime = null;
+    lateClick = true;
+  };
+
+  mouseUp();
   const obj = magicRaycast(e);
 
-  // get mesh
-  if (currentBig && obj == currentBig) return;
-  leave();
-  // unfocus currently shown book
-  currentBig = obj;
-  if (!currentBig) return; //safety
-  obj.isBig = true;
-  obj.oldPos = {x: obj.position.x, y: obj.position.y, z: obj.position.z};
+  function focus() {
+    currentBig = obj;
+    if (!currentBig) return; //safety
+    obj.isBig = true;
+    obj.oldPos = {x: obj.position.x, y: obj.position.y, z: obj.position.z};
 
-  gsap.to(obj.position, {
-    duration: 0.25,
-    x: 0,
-    y: 0,
-    z: 2,
-    ease: 'sine.out',
-  });
-  gsap.to(obj.rotation, {
-    duration: 0.20,
-    y: 0,
-    ease: 'power1.in',
-  });
+    gsap.to(obj.position, {
+      duration: 0.25,
+      x: 0,
+      y: 0,
+      z: 2,
+      ease: 'sine.out',
+    });
+    gsap.to(obj.rotation, {
+      duration: 0.20,
+      y: 0,
+      ease: 'power1.in',
+    });
+  }
+
+  console.log(lateClick);
+
+  if (currentBig) {
+    if (obj == currentBig || lateClick) return;
+
+    leave();
+    focus();
+  } else {
+    if (lateClick) return;
+
+    leave();
+    focus();
+  }
+}
+
+function onClick(e) {
 };
 
 function onPointerMove(e) {
