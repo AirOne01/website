@@ -1,3 +1,7 @@
 # Erwann Lagouche
 
-This is my portfolio, except I'm using [Svelte](https://svelte.dev/) and [Three.js](https://threejs.org/)
+<img align="right" src="https://i.imgur.com/A9eczNw.png" alt="Profile picture" width="200"/>
+
+This is a portfolio, but I'm using [Svelte](https://svelte.dev/) and [Three.js](https://threejs.org/)
+
+test
