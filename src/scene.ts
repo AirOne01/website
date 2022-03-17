@@ -3,19 +3,26 @@ import {
   AmbientLight,
   BoxGeometry,
   DirectionalLight,
-  FontLoader,
+  Euler,
   MathUtils,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
   PerspectiveCamera,
+  Quaternion,
   Raycaster,
   Scene,
-  TextGeometry,
   WebGLRenderer,
   Vector2,
   Vector3,
 } from 'three';
+
+import type { Book, BookMesh } from './Book';
+import {
+  control,
+  mouseDown,
+  mouseMove,
+  mouseUp
+} from './controls';
 
 const colors = [
   0x581845,
@@ -42,8 +49,13 @@ let renderer: WebGLRenderer;
 const raycaster = new Raycaster();
 
 const mouse = new Vector2();
+const previousMousePosition = {
+  x: 0,
+  y: 0
+};
+let isDragging = false;
 
-// for having an equal amount of books in the shelves
+// for having an equal amount of books in rows of the shelf
 let number = 80;
 let n = 3;
 const rows = [];
@@ -54,7 +66,7 @@ while (number > 0 && n > 0) {
   rows.push(a);
 }
 
-const books: { obj: Mesh, color: number, oldPos: Vector3 }[] = [];
+const books: Book[] = [];
 for (let i = 0; i < rows.length; i++) {
   for (let j = 0; j < rows[i]; j++) {
     const mesh = new Mesh(geometry, material);
@@ -64,33 +76,46 @@ for (let i = 0; i < rows.length; i++) {
     mesh.material.color.setHex(colors[Math.floor(Math.random() * colors.length)]);
     scene.add(mesh);
 
-    books.push({obj: mesh, color: colors[Math.floor(Math.random() * colors.length)], oldPos: {x: mesh.position.x, y: mesh.position.y, z: mesh.position.z}});
+    const obj: Mesh = mesh;
+    obj['isBig'] = false;
+    obj['oldPos'] = { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z };
+    books.push({ obj: obj as BookMesh, color: colors[Math.floor(Math.random() * colors.length)] });
   }
 }
 
-const animate = () => {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-};
-
-const resize = () => {
-  renderer.setSize(window.innerWidth, window.innerHeight)
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-};
-
 export const createScene = (el) => {
   renderer = new WebGLRenderer({ antialias: true, canvas: el });
+  //controls = new ObjectControls(camera, renderer.domElement, null).enableVerticalRotation();
+
   resize();
   animate();
 
   renderer.domElement.addEventListener('click', onClick);
   renderer.domElement.addEventListener('mousemove', onPointerMove);
+  renderer.domElement.addEventListener('mousedown', e => {
+    mouseDown(e);
+    isDragging = true;
+  });
+  renderer.domElement.addEventListener('mouseup', e => {
+    mouseUp();
+    isDragging = false;
+  });
 }
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+};
+
+function resize() {
+  renderer.setSize(window.innerWidth, window.innerHeight)
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+};
 
 window.addEventListener('resize', resize);
 
-function magicRaycast(e): Mesh {
+function magicRaycast(e): BookMesh {
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
@@ -105,12 +130,12 @@ function magicRaycast(e): Mesh {
 
   for (const el of intersects) {
     const zPoint = Math.floor(el.point.z * 1000);
-    if (el.distance > inte.distance && zPoint >= 200 && zPoint <= 400) {
+    if (el.distance > inte.distance && zPoint >= 200 && zPoint <= 400 && (el.object as BookMesh).isBig) {
       inte = el;
     }
   }
 
-  return inte.object as Mesh;
+  return inte.object;
 }
 
 function onClick(e) {
@@ -140,7 +165,13 @@ function onClick(e) {
 };
 
 function onPointerMove(e) {
+  mouseMove(e);
+
   const obj = magicRaycast(e);
+
+  if(obj && obj.isBig) {
+    control(obj);
+  }
 
   for (const el of books) {
     if (el.obj == obj) continue;

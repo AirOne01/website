@@ -121,6 +121,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/three@^0.138.0":
+  version "0.138.0"
+  resolved "https://registry.yarnpkg.com/@types/three/-/three-0.138.0.tgz#ec9f1d1fd8dffea2e0572f9d815ff5a35cf4dc6b"
+  integrity sha512-D8AoV7h2kbCfrv/DcebHOFh1WDwyus3HdooBkAwcBikXArdqnsQ38PQ85JCunnvun160oA9jz53GszF3zch3tg==
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -2047,15 +2052,15 @@ tar@^6.0.2, tar@^6.1.2:
     mkdirp "^1.0.3"
     yallist "^4.0.0"
 
-three.interaction@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/three.interaction/-/three.interaction-0.2.3.tgz#f7947b4e44649a822335b03b1dcc68c659d71c04"
-  integrity sha512-gipj4E9WSASSys3SC5uU8HPmHodTDYmggJqKN5yjl6S2vG966EkGLu67jkXQoyB/yvGx38C72vHwdjICAh+avg==
-
 three@^0.138.3:
   version "0.138.3"
   resolved "https://registry.yarnpkg.com/three/-/three-0.138.3.tgz#7be5153d79dcbf9e9baad82e7faf8c29edda4ed0"
   integrity sha512-4t1cKC8gimNyJChJbaklg8W/qj3PpsLJUIFm5LIuAy/hVxxNm1ru2FGTSfbTSsuHmC/7ipsyuGKqrSAKLNtkzg==
+
+threejs-object-controls@^1.2.8:
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/threejs-object-controls/-/threejs-object-controls-1.2.8.tgz#7ba68a6250e280c01be6dc656fafed29a8255923"
+  integrity sha512-FGJUyEhprq6uOU6qOI25Kp627MkpQnMUr3TktMkJAcXr4Pt/ZT/8+B1SCWRbLvR+dnXnM3GC6YT5rxm2ybsyAQ==
 
 to-regex-range@^5.0.1:
   version "5.0.1"
