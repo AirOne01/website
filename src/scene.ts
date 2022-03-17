@@ -3,17 +3,14 @@ import {
   AmbientLight,
   BoxGeometry,
   DirectionalLight,
-  Euler,
-  MathUtils,
+  type Intersection,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera,
-  Quaternion,
   Raycaster,
   Scene,
   WebGLRenderer,
   Vector2,
-  Vector3,
 } from 'three';
 
 import type { Book, BookMesh } from './Book';
@@ -21,16 +18,16 @@ import {
   control,
   mouseDown,
   mouseMove,
-  mouseUp
-} from './controls';
+  mouseUp,
+} from './controls.ts';
 
 const colors = [
   0x581845,
   0x900c3f,
   0xc70039,
   0xff5733,
-  0xffc300
-]
+  0xffc300,
+];
 
 let currentBig = null;
 
@@ -56,52 +53,39 @@ let number = 80;
 let n = 3;
 const rows = [];
 while (number > 0 && n > 0) {
-  const a = Math.ceil(number / n );
+  const a = Math.ceil(number / n);
   number -= a;
-  n--;
+  n += 1;
   rows.push(a);
 }
 
 const books: Book[] = [];
-for (let i = 0; i < rows.length; i++) {
-  for (let j = 0; j < rows[i]; j++) {
+for (let i = 0; i < rows.length; i += 1) {
+  for (let j = 0; j < rows[i]; j += 1) {
     const mesh = new Mesh(geometry, material);
-    mesh.translateX((j*0.103)-((rows[i]*0.103)/2));
-    mesh.translateY((i*0.72)-((rows.length*0.72)/3));
-    mesh.rotateY(Math.PI/2);
+    mesh.translateX((j * 0.103) - ((rows[i] * 0.103) / 2));
+    mesh.translateY((i * 0.72) - ((rows.length * 0.72) / 3));
+    mesh.rotateY(Math.PI / 2);
     mesh.material.color.setHex(colors[Math.floor(Math.random() * colors.length)]);
     scene.add(mesh);
 
-    const obj: Mesh = mesh;
-    obj['isBig'] = false;
-    obj['oldPos'] = { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z };
-    books.push({ obj: obj as BookMesh, color: colors[Math.floor(Math.random() * colors.length)] });
+    const obj: BookMesh = mesh as unknown as BookMesh;
+    obj.isBig = false;
+    obj.oldPos = { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z };
+    books.push({ obj, color: colors[Math.floor(Math.random() * colors.length)] });
   }
-}
-
-export const createScene = (el) => {
-  renderer = new WebGLRenderer({ antialias: true, canvas: el });
-  //controls = new ObjectControls(camera, renderer.domElement, null).enableVerticalRotation();
-
-  resize();
-  animate();
-
-  //renderer.domElement.addEventListener('click', onClick);
-  renderer.domElement.addEventListener('mousemove', onPointerMove);
-  renderer.domElement.addEventListener('mousedown', onMouseDown);
-  renderer.domElement.addEventListener('mouseup', onMouseUp);
 }
 
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
-};
+}
 
 function resize() {
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-};
+}
 
 window.addEventListener('resize', resize);
 
@@ -113,19 +97,44 @@ function magicRaycast(e): BookMesh {
   raycaster.params.Points.threshold = 0.1;
   const intersects = raycaster.intersectObjects(scene.children, true);
 
-  if (intersects.length == 0) return null;
+  if (intersects.length === 0) return null;
 
-  let inte = null;
-  if (intersects.length > 0) inte = intersects[0];
+  let inte: Intersection = null;
+  if (intersects.length > 0) [inte] = intersects;
 
-  for (const el of intersects) {
+  intersects.forEach((el) => {
     const zPoint = Math.floor(el.point.z * 1000);
-    if (el.distance > inte.distance && zPoint >= 200 && zPoint <= 400 && (el.object as BookMesh).isBig) {
+    if (el.distance > inte.distance
+      && zPoint >= 200
+      && zPoint <= 400
+      && (el.object as BookMesh).isBig) {
       inte = el;
     }
-  }
+  });
 
-  return inte.object;
+  return inte.object as BookMesh;
+}
+
+function leave() {
+  if (!currentBig) return;
+  if (currentBig.isBig) {
+    gsap.to(currentBig.position, {
+      duration: 0.25,
+      x: currentBig.oldPos.x,
+      y: currentBig.oldPos.y,
+      z: 0,
+      ease: 'sine.out',
+    });
+    gsap.to(currentBig.rotation, {
+      duration: 0.15,
+      x: 0,
+      y: Math.PI / 2,
+      z: 0,
+      ease: 'sine.in',
+    });
+  }
+  currentBig.isBig = false;
+  currentBig = null;
 }
 
 function onMouseDown(e) {
@@ -139,16 +148,16 @@ function onMouseUp(e) {
   if (new Date().getTime() - dragTime > 200) {
     dragTime = null;
     lateClick = true;
-  };
+  }
 
   mouseUp();
   const obj = magicRaycast(e);
 
   function focus() {
     currentBig = obj;
-    if (!currentBig) return; //safety
+    if (!currentBig) return; // safety
     obj.isBig = true;
-    obj.oldPos = {x: obj.position.x, y: obj.position.y, z: obj.position.z};
+    obj.oldPos = { x: obj.position.x, y: obj.position.y, z: obj.position.z };
 
     gsap.to(obj.position, {
       duration: 0.25,
@@ -164,10 +173,8 @@ function onMouseUp(e) {
     });
   }
 
-  console.log(lateClick);
-
   if (currentBig) {
-    if (obj == currentBig || lateClick) return;
+    if (obj === currentBig || lateClick) return;
 
     leave();
     focus();
@@ -179,27 +186,24 @@ function onMouseUp(e) {
   }
 }
 
-function onClick(e) {
-};
-
 function onPointerMove(e) {
   mouseMove(e);
 
   const obj = magicRaycast(e);
 
-  if(obj && obj.isBig) {
+  if (obj && obj.isBig) {
     control(obj);
   }
 
-  for (const el of books) {
-    if (el.obj == obj) continue;
-    if (el.obj.isBig) continue;
+  books.forEach((el) => {
+    if (el.obj === obj) return;
+    if (el.obj.isBig) return;
     gsap.to(el.obj.position, {
       duration: 0.25,
       z: 0,
       ease: 'sine.out',
     });
-  }
+  });
 
   // if hovering over a book
   if (obj && !obj.isBig) {
@@ -209,26 +213,17 @@ function onPointerMove(e) {
       ease: 'sine.out',
     });
   }
-};
+}
 
-function leave() {
-  if (!currentBig) return;
-  if (currentBig.isBig) {
-    gsap.to(currentBig.position, {
-      duration: 0.25,
-      x: currentBig.oldPos.x,
-      y: currentBig.oldPos.y,
-      z: 0,
-      ease: 'sine.out',
-    });
-    gsap.to(currentBig.rotation, {
-      duration: 0.15,
-      x: 0,
-      y: Math.PI/2,
-      z: 0,
-      ease: 'sine.in',
-    });
-  }
-  currentBig.isBig = false;
-  currentBig = null;
-};
+function createScene(el) {
+  renderer = new WebGLRenderer({ antialias: true, canvas: el });
+
+  resize();
+  animate();
+
+  renderer.domElement.addEventListener('mousemove', onPointerMove);
+  renderer.domElement.addEventListener('mousedown', onMouseDown);
+  renderer.domElement.addEventListener('mouseup', onMouseUp);
+}
+
+export default createScene;

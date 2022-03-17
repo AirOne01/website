@@ -1,10 +1,12 @@
 // Pretty much all of this code was scrapped from https://github.com/albertopiras/threeJS-object-controls/
 // Under MIT license. https://opensource.org/licenses/MIT
 
-import type { Mesh } from 'three';
+import type { Material, Mesh } from 'three';
 
-/********************* Control variables *************************/
+// Magic type
+type ExMesh = Material[] & Mesh;
 
+// Control variables
 const MAX_ROTATON_ANGLES = {
   x: {
     // Vertical from bottom to top.
@@ -19,55 +21,46 @@ const MAX_ROTATON_ANGLES = {
     to: Math.PI / 4,
   },
 };
+let mesh: ExMesh;
+const rotationSpeed = 0.05;
+let isDragging = false;
+const verticalRotationEnabled = true;
+const horizontalRotationEnabled = true;
+let previousMousePosition = { x: 0, y: 0 };
 
-let flag,
-  mesh: Mesh,
-  maxDistance = 15,
-  minDistance = 6,
-  zoomSpeed = 0.5,
-  rotationSpeed = 0.05,
-  rotationSpeedTouchDevices = 0.05,
-  isDragging = false,
-  verticalRotationEnabled = true,
-  horizontalRotationEnabled = true,
-  zoomEnabled = true,
-  mouseFlags = { MOUSEDOWN: 0, MOUSEMOVE: 1 },
-  previousMousePosition = { x: 0, y: 0 },
-  prevZoomDiff = { X: null, Y: null },
-  /**
-   * CurrentTouches
-   * length 0 : no zoom
-   * length 2 : is zoomming
-   */
-  currentTouches = [];
+// Shared functions
 
-/***************************** Shared functions **********************/
-
-function rotateVertical(deltaMove, mesh) {
+function rotateVertical(deltaMove) {
   if (mesh.length > 1) {
-    for (let i = 0; i < mesh.length; i++) {
-      rotateVertical(deltaMove, mesh[i]);
+    for (let i = 0; i < mesh.length; i += 1) {
+      rotateVertical(deltaMove);
     }
     return;
   }
   mesh.rotation.x += Math.sign(deltaMove.y) * rotationSpeed;
 }
 
-function rotateHorizontal(deltaMove, mesh) {
+function rotateHorizontal(deltaMove) {
   if (mesh.length > 1) {
-    for (let i = 0; i < mesh.length; i++) {
-      rotateHorizontal(deltaMove, mesh[i]);
+    for (let i = 0; i < mesh.length; i += 1) {
+      rotateHorizontal(deltaMove);
     }
     return;
   }
   mesh.rotation.y += Math.sign(deltaMove.x) * rotationSpeed;
 }
 
+function isRotationWithinMaxAngles(meshToRotate, delta, axe) {
+  return MAX_ROTATON_ANGLES[axe].from * -1
+    < meshToRotate.rotation[axe] + delta
+    && meshToRotate.rotation[axe] + delta < MAX_ROTATON_ANGLES[axe].to;
+}
+
 function isWithinMaxAngle(delta, axe) {
   if (MAX_ROTATON_ANGLES[axe].enabled) {
     if (mesh.length > 1) {
       let condition = true;
-      for (let i = 0; i < mesh.length; i++) {
+      for (let i = 0; i < mesh.length; i += 1) {
         if (!condition) return false;
         if (MAX_ROTATON_ANGLES[axe].enabled) {
           condition = isRotationWithinMaxAngles(mesh[i], delta, axe);
@@ -80,22 +73,14 @@ function isWithinMaxAngle(delta, axe) {
   return true;
 }
 
-function isRotationWithinMaxAngles(meshToRotate, delta, axe) {
-  return MAX_ROTATON_ANGLES[axe].from * -1 <
-    meshToRotate.rotation[axe] + delta &&
-    meshToRotate.rotation[axe] + delta < MAX_ROTATON_ANGLES[axe].to
-    ? true
-    : false;
-}
-
 function resetMousePosition() {
   previousMousePosition = { x: 0, y: 0 };
 }
 
-/******************  MOUSE interaction functions - desktop  *****/
-function mouseDown(e) {
+// MOUSE interaction functions - desktop
+
+function mouseDown() {
   isDragging = true;
-  flag = mouseFlags.MOUSEDOWN;
 }
 
 function mouseMove(e) {
@@ -107,24 +92,20 @@ function mouseMove(e) {
 
     previousMousePosition = { x: e.offsetX, y: e.offsetY };
 
-    if (horizontalRotationEnabled && deltaMove.x != 0) {
+    if (horizontalRotationEnabled && deltaMove.x !== 0) {
       // && (Math.abs(deltaMove.x) > Math.abs(deltaMove.y))) {
       // enabling this, the mesh will rotate only in one specific direction
       // for mouse movement
-      if (!isWithinMaxAngle(Math.sign(deltaMove.x) * rotationSpeed, "y"))
-        return;
-      rotateHorizontal(deltaMove, mesh);
-      flag = mouseFlags.MOUSEMOVE;
+      if (!isWithinMaxAngle(Math.sign(deltaMove.x) * rotationSpeed, 'y')) return;
+      rotateHorizontal(deltaMove);
     }
 
-    if (verticalRotationEnabled && deltaMove.y != 0) {
+    if (verticalRotationEnabled && deltaMove.y !== 0) {
       // &&(Math.abs(deltaMove.y) > Math.abs(deltaMove.x)) //
       // enabling this, the mesh will rotate only in one specific direction for
       // mouse movement
-      if (!isWithinMaxAngle(Math.sign(deltaMove.y) * rotationSpeed, "x"))
-        return;
-      rotateVertical(deltaMove, mesh);
-      flag = mouseFlags.MOUSEMOVE;
+      if (!isWithinMaxAngle(Math.sign(deltaMove.y) * rotationSpeed, 'x')) return;
+      rotateVertical(deltaMove);
     }
   }
 }
@@ -134,15 +115,15 @@ function mouseUp() {
   resetMousePosition();
 }
 
-/******************  Custom functions  *****/
+// Custom functions
 
 function control(obj: Mesh) {
-  mesh = obj;
+  mesh = obj as ExMesh;
 }
 
 export {
   control,
   mouseDown,
   mouseMove,
-  mouseUp
-}
+  mouseUp,
+};
