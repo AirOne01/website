@@ -1,0 +1,84 @@
+name: Linting
+
+on: [push, workflow_dispatch]
+
+jobs:
+  # Linting (ESLint)
+  lint-eslint:
+    name: Lint - ESLint
+    # Using ubuntu because it's stable
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Fetch/save cache
+        uses: actions/cache@v2.1.7
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+
+      - name: Install dependencies
+        run: |
+          npm i eslint
+          npm i eslint-config-airbnb-base
+          npm i eslint-plugin-import
+          npm i @typescript-eslint/eslint-plugin
+          npm i @typescript-eslint/parser
+
+      - name: Lint project
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+
+  # Linting (shellcheck)
+  lint-shellcheck:
+    name: Lint - Shellcheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        env:
+          SHELLCHECK_OPTS: -e SC3045 -e SC2162
+
+  # Linting (Checkov)
+  lint-checkov:
+    name: Lint - Checkov
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Lint project
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+
+  # Linting (Markdownlint)
+  lint-markdownlint:
+    name: Lint - Markdownlint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: markdownlint-cli
+        uses: nosborn/github-action-markdown-cli@v3.0.1
+        with:
+          files: .
+          config_file: .markdownlint.yaml
