@@ -19,7 +19,7 @@ import {
   mouseDown,
   mouseMove,
   mouseUp,
-} from './controls.ts';
+} from './controls';
 
 const colors = [
   0x581845,
@@ -49,13 +49,12 @@ const mouse = new Vector2();
 let dragTime: number;
 
 // for having an equal amount of books in rows of the shelf
-let number = 80;
-let n = 3;
+let number = 300;
+const n = 5;
 const rows = [];
-while (number > 0 && n > 0) {
-  const a = Math.ceil(number / n);
+for (let i = 0; i < n; i += 1) {
+  const a = Math.ceil(number / (n - i));
   number -= a;
-  n += 1;
   rows.push(a);
 }
 
@@ -64,7 +63,7 @@ for (let i = 0; i < rows.length; i += 1) {
   for (let j = 0; j < rows[i]; j += 1) {
     const mesh = new Mesh(geometry, material);
     mesh.translateX((j * 0.103) - ((rows[i] * 0.103) / 2));
-    mesh.translateY((i * 0.72) - ((rows.length * 0.72) / 3));
+    mesh.translateY((i * 0.72) - ((rows.length * 0.72) / 2.5));
     mesh.rotateY(Math.PI / 2);
     mesh.material.color.setHex(colors[Math.floor(Math.random() * colors.length)]);
     scene.add(mesh);
@@ -138,7 +137,7 @@ function leave() {
 }
 
 function onMouseDown(e) {
-  mouseDown(e);
+  mouseDown();
   dragTime = new Date().getTime();
 }
 

@@ -1,8 +1,8 @@
 <script lang='ts'>
   import { onMount, SvelteComponent } from 'svelte';
-  import { createScene } from './scene';
+  import createScene from './scene';
 
-  let el: SvelteComponent;
+  let el: HTMLCanvasElement;
 
   onMount(() => {
     createScene(el);
