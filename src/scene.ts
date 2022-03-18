@@ -136,7 +136,7 @@ function leave() {
   currentBig = null;
 }
 
-function onMouseDown(e) {
+function onMouseDown() {
   mouseDown();
   dragTime = new Date().getTime();
 }
