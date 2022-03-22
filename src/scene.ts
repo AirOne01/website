@@ -55,7 +55,6 @@ const rows = [];
 for (let i = 0; i < n; i += 1) {
   const a = Math.ceil(number / (n - i));
   number -= a;
-  n -= 1;
   rows.push(a);
 }
 
