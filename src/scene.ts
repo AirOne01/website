@@ -105,8 +105,7 @@ function magicRaycast(e: MouseEvent): BookMesh | null {
     const zPoint = Math.floor(el.point.z * 1000);
     if (el.distance > inte!.distance
       && zPoint >= 200
-      && zPoint <= 400
-      && (el.object as BookMesh).isBig) {
+      && zPoint <= 400) {
       inte = el;
     }
   });
