@@ -49,13 +49,13 @@ const mouse = new Vector2();
 let dragTime: number;
 
 // for having an equal amount of books in rows of the shelf
-let number = 80;
+let number = 81;
 let n = 3;
 const rows = [];
 while (number > 0 && n > 0) {
   const a = Math.ceil(number / n);
   number -= a;
-  n += 1;
+  n -= 1;
   rows.push(a);
 }
 
