@@ -29,7 +29,8 @@ const colors = [
   0xffc300,
 ];
 
-let currentBig: BookMesh | null = null;
+let bigBook: BookMesh | null = null;
+let clickedBook: BookMesh | null = null;
 
 const scene = new Scene();
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -114,17 +115,17 @@ function magicRaycast(e: MouseEvent): BookMesh | null {
 }
 
 function leave() {
-  if (!currentBig) return;
+  if (!bigBook) return;
 
-  if (currentBig!.isBig) {
-    gsap.to(currentBig!.position, {
+  if (bigBook!.isBig) {
+    gsap.to(bigBook!.position, {
       duration: 0.25,
-      x: currentBig!.oldPos.x,
-      y: currentBig!.oldPos.y,
+      x: bigBook!.oldPos.x,
+      y: bigBook!.oldPos.y,
       z: 0,
       ease: 'sine.out',
     });
-    gsap.to(currentBig!.rotation, {
+    gsap.to(bigBook!.rotation, {
       duration: 0.15,
       x: 0,
       y: Math.PI / 2,
@@ -133,13 +134,14 @@ function leave() {
     });
   }
 
-  currentBig.isBig = false;
-  currentBig = null;
+  bigBook.isBig = false;
+  bigBook = null;
 }
 
-function onMouseDown() {
-  mouseDown();
+function onMouseDown(e: MouseEvent) {
+  clickedBook = magicRaycast(e);
   dragTime = new Date().getTime();
+  mouseDown();
 }
 
 function onMouseUp(e: MouseEvent) {
@@ -152,10 +154,11 @@ function onMouseUp(e: MouseEvent) {
   const obj = magicRaycast(e);
 
   function focus() {
-    currentBig = obj;
+    bigBook = obj;
     if (!obj) return; // safety
     obj.isBig = true;
     obj.oldPos = { x: obj.position.x, y: obj.position.y, z: obj.position.z };
+    control(obj);
 
     gsap.to(obj.position, {
       duration: 0.25,
@@ -171,8 +174,9 @@ function onMouseUp(e: MouseEvent) {
     });
   }
 
-  if (currentBig) {
-    if (obj === currentBig || !click) return;
+  if (obj !== clickedBook) return;
+  if (bigBook) {
+    if (obj === bigBook || !click) return;
 
     leave();
     focus();
@@ -182,15 +186,15 @@ function onMouseUp(e: MouseEvent) {
     leave();
     focus();
   }
+
+  clickedBook = null;
 }
 
 function onPointerMove(e: MouseEvent) {
-  mouseMove(e);
-
   const obj = magicRaycast(e);
 
-  if (obj && obj.isBig) {
-    control(obj);
+  if (bigBook) {
+    mouseMove(e);
   }
 
   books.forEach((el) => {
