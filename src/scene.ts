@@ -29,7 +29,7 @@ const colors = [
   0xffc300,
 ];
 
-let currentBig = null;
+let currentBig: BookMesh | null = null;
 
 const scene = new Scene();
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -46,7 +46,7 @@ let renderer: WebGLRenderer;
 const raycaster = new Raycaster();
 
 const mouse = new Vector2();
-let dragTime: number;
+let dragTime: number | null;
 
 // for having an equal amount of books in rows of the shelf
 let number = 300;
@@ -88,22 +88,22 @@ function resize() {
 
 window.addEventListener('resize', resize);
 
-function magicRaycast(e): BookMesh {
+function magicRaycast(e: MouseEvent): BookMesh | null {
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
-  raycaster.params.Points.threshold = 0.1;
+  raycaster.params.Points!.threshold = 0.1;
   const intersects = raycaster.intersectObjects(scene.children, true);
 
   if (intersects.length === 0) return null;
 
-  let inte: Intersection = null;
+  let inte: Intersection | null = null;
   if (intersects.length > 0) [inte] = intersects;
 
   intersects.forEach((el) => {
     const zPoint = Math.floor(el.point.z * 1000);
-    if (el.distance > inte.distance
+    if (el.distance > inte!.distance
       && zPoint >= 200
       && zPoint <= 400
       && (el.object as BookMesh).isBig) {
@@ -111,20 +111,21 @@ function magicRaycast(e): BookMesh {
     }
   });
 
-  return inte.object as BookMesh;
+  return inte!.object as BookMesh;
 }
 
 function leave() {
   if (!currentBig) return;
-  if (currentBig.isBig) {
-    gsap.to(currentBig.position, {
+
+  if (currentBig!.isBig) {
+    gsap.to(currentBig!.position, {
       duration: 0.25,
-      x: currentBig.oldPos.x,
-      y: currentBig.oldPos.y,
+      x: currentBig!.oldPos.x,
+      y: currentBig!.oldPos.y,
       z: 0,
       ease: 'sine.out',
     });
-    gsap.to(currentBig.rotation, {
+    gsap.to(currentBig!.rotation, {
       duration: 0.15,
       x: 0,
       y: Math.PI / 2,
@@ -132,6 +133,7 @@ function leave() {
       ease: 'sine.in',
     });
   }
+
   currentBig.isBig = false;
   currentBig = null;
 }
@@ -141,10 +143,10 @@ function onMouseDown() {
   dragTime = new Date().getTime();
 }
 
-function onMouseUp(e) {
+function onMouseUp(e: MouseEvent) {
   let click = false;
 
-  if (new Date().getTime() - dragTime < 200) click = true;
+  if (new Date().getTime() - dragTime! < 200) click = true;
 
   dragTime = null;
   mouseUp();
@@ -152,7 +154,7 @@ function onMouseUp(e) {
 
   function focus() {
     currentBig = obj;
-    if (!currentBig) return; // safety
+    if (!obj) return; // safety
     obj.isBig = true;
     obj.oldPos = { x: obj.position.x, y: obj.position.y, z: obj.position.z };
 
@@ -183,7 +185,7 @@ function onMouseUp(e) {
   }
 }
 
-function onPointerMove(e) {
+function onPointerMove(e: MouseEvent) {
   mouseMove(e);
 
   const obj = magicRaycast(e);
@@ -212,7 +214,7 @@ function onPointerMove(e) {
   }
 }
 
-function createScene(el) {
+function createScene(el: HTMLCanvasElement) {
   renderer = new WebGLRenderer({ antialias: true, canvas: el });
 
   resize();
