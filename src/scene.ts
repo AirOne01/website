@@ -142,13 +142,11 @@ function onMouseDown() {
 }
 
 function onMouseUp(e) {
-  let lateClick = false;
+  let click = false;
 
-  if (new Date().getTime() - dragTime > 200) {
-    dragTime = null;
-    lateClick = true;
-  }
+  if (new Date().getTime() - dragTime < 200) click = true;
 
+  dragTime = null;
   mouseUp();
   const obj = magicRaycast(e);
 
@@ -173,12 +171,12 @@ function onMouseUp(e) {
   }
 
   if (currentBig) {
-    if (obj === currentBig || lateClick) return;
+    if (obj === currentBig || !click) return;
 
     leave();
     focus();
   } else {
-    if (lateClick) return;
+    if (!click) return;
 
     leave();
     focus();

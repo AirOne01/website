@@ -1,7 +1,5 @@
-import App from './App.svelte';
+import createScene from './scene';
 
-const bookshelf = new App({
-  target: document.getElementById('bookshelf'),
-});
+const app = document.querySelector<HTMLDivElement>('#app')!;
 
-export default bookshelf;
+createScene(app);
