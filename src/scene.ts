@@ -195,6 +195,10 @@ function onMouseUp(e: MouseEvent) {
   clickedBook = null;
 }
 
+function setCursor(type: 'default' | 'pointer') {
+  document.querySelector<HTMLBodyElement>('body')!.style.cursor = type;
+}
+
 function onPointerMove(e: MouseEvent) {
   const obj = magicRaycast(e);
 
@@ -213,15 +217,17 @@ function onPointerMove(e: MouseEvent) {
   });
 
   // if hovering over a book
-  if (obj && !obj.isBig) {
+  if (obj && !obj.isBig && !dragging()) {
+    setCursor('pointer');
+  } else if (obj && !obj.isBig) {
     gsap.to(obj.position, {
       duration: 0.25,
       z: 0.3,
       ease: 'sine.out',
     });
-    if (!dragging()) document.querySelector<HTMLBodyElement>('body')!.style.cursor = 'pointer';
+    if (dragging() && bigBook) setCursor('default');
   } else {
-    document.querySelector<HTMLBodyElement>('body')!.style.cursor = 'default';
+    setCursor('default');
   }
 }
 
