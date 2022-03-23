@@ -16,6 +16,7 @@ import {
 import type { Book, BookMesh } from './Book';
 import {
   control,
+  dragging,
   mouseDown,
   mouseMove,
   mouseUp,
@@ -102,13 +103,16 @@ function magicRaycast(e: MouseEvent): BookMesh | null {
   let inte: Intersection | null = null;
   if (intersects.length > 0) [inte] = intersects;
 
-  intersects.forEach((el) => {
+  intersects.every((el) => {
     const zPoint = Math.floor(el.point.z * 1000);
-    if (el.distance > inte!.distance
+    if ((el.distance > inte!.distance
       && zPoint >= 200
-      && zPoint <= 400) {
+      && zPoint <= 400)
+      || el.object.position.z === 2) {
       inte = el;
+      return false;
     }
+    return true;
   });
 
   return inte!.object as BookMesh;
@@ -214,6 +218,9 @@ function onPointerMove(e: MouseEvent) {
       z: 0.3,
       ease: 'sine.out',
     });
+    if (!dragging()) document.querySelector<HTMLBodyElement>('body')!.style.cursor = 'pointer';
+  } else {
+    document.querySelector<HTMLBodyElement>('body')!.style.cursor = 'default';
   }
 }
 

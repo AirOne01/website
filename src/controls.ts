@@ -121,8 +121,13 @@ function control(obj: Mesh) {
   mesh = obj as ExMesh;
 }
 
+function dragging() {
+  return isDragging;
+}
+
 export {
   control,
+  dragging,
   mouseDown,
   mouseMove,
   mouseUp,
