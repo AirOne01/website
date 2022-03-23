@@ -129,11 +129,12 @@ function leave() {
       z: 0,
       ease: 'sine.out',
     });
+    // rotating the book back to the original position, but without extra rotation
     gsap.to(bigBook!.rotation, {
       duration: 0.15,
-      x: 0,
-      y: Math.PI / 2,
-      z: 0,
+      x: Math.floor((bigBook!.rotation.x) / Math.PI) * Math.PI + Math.PI / 2,
+      y: Math.floor((bigBook!.rotation.y) / Math.PI) * Math.PI + Math.PI / 2,
+      z: Math.floor((bigBook!.rotation.z) / Math.PI) * Math.PI + Math.PI / 2,
       ease: 'sine.in',
     });
   }
